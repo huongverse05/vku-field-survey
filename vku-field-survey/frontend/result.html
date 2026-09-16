@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#2563eb">
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="css/style.css">
+    <title>Phiếu đã lưu</title>
+</head>
+<body>
+
+<div class="container">
+    <header class="header">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <a href="index.html">← Trang chủ</a>
+            <button id="btnManualSync" onclick="handleManualSync()" class="button" style="font-size: 13px; padding: 6px 12px; cursor: pointer;">
+                🔄 Đồng bộ ngay
+            </button>
+        </div>
+        <h1>Phiếu đã lưu</h1>
+        <p id="networkStatusDisplay">Đang kiểm tra kết nối...</p>
+    </header>
+
+    <div id="surveyList">
+        <div class="card">Đang đọc dữ liệu từ IndexedDB...</div>
+    </div>
+</div>
+
+<!-- Nạp IndexedDB và App Shell logic -->
+<script src="js/db.js"></script>
+<script src="js/sync.js"></script>
+<script src="js/app.js"></script>
+
+<script>
+const BACKEND_API = "http://127.0.0.1:5000/api/survey";
+
+function escapeHTML(value) {
+    if (value === null || value === undefined) return "";
+    return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+// Tải và hiển thị danh sách phiếu từ IndexedDB
+async function loadSurveys() {
+    const container = document.getElementById("surveyList");
+    const statusDisplay = document.getElementById("networkStatusDisplay");
+    
+    if (statusDisplay) {
+        statusDisplay.innerHTML = navigator.onLine 
+            ? "Trạng thái: 🟢 <b>Online</b>" 
+            : "Trạng thái: 🔴 <b>Offline</b> (Đang lưu trên máy)";
+    }
+
+    try {
+        if (typeof getAllSurveys !== "function") {
+            throw new Error("Chưa nạp được hàm getAllSurveys() từ js/db.js");
+        }
+
+        const surveys = await getAllSurveys();
+
+        if (!surveys || surveys.length === 0) {
+            container.innerHTML = `
+                <div class="card" style="text-align: center;">
+                    <h2>Chưa có phiếu khảo sát</h2>
+                    <p>Bạn chưa lưu phiếu nào trên thiết bị.</p>
+                    <a href="survey.html" class="button" style="display: inline-block; margin-top: 10px;">Tạo phiếu mới</a>
+                </div>
+            `;
+            return;
+        }
+
+        container.innerHTML = surveys.map(survey => {
+            const isSynced = survey.status === "synced" || survey.sync_status === "synced";
+            const statusBadge = isSynced 
+                ? `<span style="color: #16a34a; font-weight: bold;">🟢 Đã đồng bộ</span>` 
+                : `<span style="color: #ea580c; font-weight: bold;">🟠 Chờ đồng bộ</span>`;
+
+            const createdAt = survey.createdAt 
+                ? new Date(survey.createdAt).toLocaleString("vi-VN") 
+                : (survey.created_at ? new Date(survey.created_at).toLocaleString("vi-VN") : "Không rõ");
+
+            // Format id thành dạng số hoặc chuỗi an toàn
+            const recordId = typeof survey.id === 'number' ? survey.id : `'${survey.id}'`;
+
+            return `
+                <div class="card" style="margin-bottom: 16px;">
+                    <div style="display: flex; justify-content: space-between; align-items: start;">
+                        <h2 style="margin-top: 0;">${escapeHTML(survey.location || "Không có địa điểm")}</h2>
+                        <div>${statusBadge}</div>
+                    </div>
+
+                    <p><strong>Mã phiếu:</strong> ${escapeHTML(survey.id)}</p>
+                    <p><strong>Người điều tra:</strong> ${escapeHTML(survey.investigator || survey.surveyor || "Ẩn danh")}</p>
+                    <p><strong>Loại cơ sở:</strong> ${escapeHTML(survey.facilityType || "Chung")}</p>
+                    <p><strong>Đảm bảo:</strong> ${escapeHTML(survey.quality || "Không rõ")}</p>
+                    <p><strong>Đánh giá:</strong> ⭐ ${survey.rating || 0}/5</p>
+                    <p><strong>Nhận xét:</strong> ${escapeHTML(survey.comment || "Không có")}</p>
+                    <p style="font-size: 12px; color: #6b7280;"><strong>Thời gian:</strong> ${createdAt}</p>
+
+                    <div style="margin-top: 12px; text-align: right;">
+                        <button onclick="removeSurvey(${recordId})" class="button" style="background: #dc2626; padding: 6px 12px; font-size: 13px;">
+                            Xóa phiếu
+                        </button>
+                    </div>
+                </div>
+            `;
+        }).join("");
+
+    } catch (error) {
+        console.error("Lỗi loadSurveys:", error);
+        container.innerHTML = `
+            <div class="card">
+                <h2 style="color: #dc2626;">❌ Lỗi đọc dữ liệu</h2>
+                <p>Chi tiết: ${escapeHTML(error.message)}</p>
+            </div>
+        `;
+    }
+}
+
+// Xóa phiếu khỏi IndexedDB
+async function removeSurvey(id) {
+    if (!confirm("Bạn có chắc muốn xóa phiếu này không?")) return;
+    try {
+        if (typeof deleteSurvey === "function") {
+            await deleteSurvey(id);
+            await loadSurveys();
+        } else {
+            alert("Thiếu hàm deleteSurvey() trong db.js");
+        }
+    } catch (err) {
+        console.error("Lỗi xóa phiếu:", err);
+        alert("Lỗi xóa: " + err.message);
+    }
+}
+
+// Xử lý nút bấm đồng bộ (Tích hợp sẵn logic chạy độc lập không lo thiếu hàm từ file ngoài)
+async function handleManualSync() {
+    const btn = document.getElementById("btnManualSync");
+    btn.disabled = true;
+    btn.innerText = "Đang đồng bộ...";
+
+    if (!navigator.onLine) {
+        alert("Thiết bị đang Offline, vui lòng bật mạng trước khi đồng bộ!");
+        btn.disabled = false;
+        btn.innerText = "🔄 Đồng bộ ngay";
+        return;
+    }
+
+    try {
+        console.log("Bắt đầu quét danh sách phiếu để đồng bộ...");
+        const surveys = await getAllSurveys();
+        const pendingSurveys = surveys.filter(s => s.status === "pending" || s.sync_status === "pending");
+
+        if (pendingSurveys.length === 0) {
+            alert("Tất cả phiếu đã được đồng bộ!");
+            btn.disabled = false;
+            btn.innerText = "🔄 Đồng bộ ngay";
+            return;
+        }
+
+        let count = 0;
+        for (const survey of pendingSurveys) {
+            try {
+                console.log("Đang gửi phiếu ID:", survey.id);
+                const res = await fetch(BACKEND_API, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(survey)
+                });
+
+                if (res.ok) {
+                    // Cập nhật trạng thái thành synced
+                    survey.status = "synced";
+                    survey.sync_status = "synced";
+                    survey.syncedAt = new Date().toISOString();
+                    
+                    // Ghi đè lại bản ghi vào IndexedDB
+                    await saveSurvey(survey);
+                    count++;
+                } else {
+                    console.error(`Lỗi HTTP ${res.status} với phiếu ${survey.id}`);
+                }
+            } catch (err) {
+                console.error(`Không thể gửi phiếu ${survey.id}:`, err);
+            }
+        }
+
+        alert(`Hoàn tất! Đã đồng bộ thành công ${count}/${pendingSurveys.length} phiếu.`);
+
+    } catch (err) {
+        console.error("Lỗi đồng bộ:", err);
+        alert("Lỗi đồng bộ: " + err.message);
+    } finally {
+        await loadSurveys();
+        btn.disabled = false;
+        btn.innerText = "🔄 Đồng bộ ngay";
+    }
+}
+
+// Lắng nghe mạng khôi phục
+window.addEventListener("online", async () => {
+    await handleManualSync();
+});
+
+window.addEventListener("offline", loadSurveys);
+
+// Nạp dữ liệu khi mở trang
+document.addEventListener("DOMContentLoaded", loadSurveys);
+</script>
+
+</body>
+</html>

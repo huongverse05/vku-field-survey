@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <meta name="theme-color" content="#2563eb">
+
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="css/style.css">
+
+    <title>VKU Field Survey</title>
+</head>
+
+<body>
+
+<div class="container">
+
+    <header class="header">
+        <h1>VKU Field Survey</h1>
+        <p>Ứng dụng điều tra hiện trường</p>
+    </header>
+
+    <div class="status-card">
+        <span id="networkStatus">Đang kiểm tra kết nối...</span>
+    </div>
+
+    <div class="card">
+        <h2>Khảo sát</h2>
+
+        <p>
+            Tạo phiếu khảo sát hiện trường.
+            Dữ liệu vẫn được lưu khi không có Internet.
+        </p>
+
+        <a href="survey.html" class="button">
+            Bắt đầu khảo sát
+        </a>
+    </div>
+
+    <div class="card">
+        <h2>Dữ liệu đã lưu</h2>
+
+        <p>
+            Phiếu khảo sát được lưu trực tiếp trên thiết bị
+            bằng IndexedDB.
+        </p>
+
+        <a href="result.html" class="button secondary">
+            Xem phiếu đã lưu
+        </a>
+    </div>
+
+</div>
+
+<script src="js/app.js"></script>
+
+</body>
+</html>

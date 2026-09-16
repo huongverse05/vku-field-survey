@@ -1,0 +1,10 @@
+{
+    "name": "VKU Field Survey",
+    "short_name": "VKU Survey",
+    "description": "Ứng dụng điều tra hiện trường offline-first",
+    "start_url": "./index.html",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#2563eb",
+    "orientation": "portrait"
+}
