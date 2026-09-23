@@ -1,10 +1,22 @@
 {
-    "name": "VKU Field Survey",
-    "short_name": "VKU Survey",
-    "description": "Ứng dụng điều tra hiện trường offline-first",
-    "start_url": "./index.html",
-    "display": "standalone",
-    "background_color": "#ffffff",
-    "theme_color": "#2563eb",
-    "orientation": "portrait"
+  "name": "VKU Field Survey",
+  "short_name": "VKU Survey",
+  "description": "Ứng dụng điều tra hiện trường offline-first",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#2563eb",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "images/icon-08.jpg",
+      "sizes": "192x192",
+      "type": "image/jpg"
+    },
+    {
+      "src": "images/icon-09.jpg",
+      "sizes": "512x512",
+      "type": "image/jpg"
+    }
+  ]
 }

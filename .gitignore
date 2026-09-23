@@ -1,0 +1,12 @@
+# Python virtual environment
+.venv/
+__pycache__/
+
+# Credentials & API Keys
+*.json
+credentials/
+service-account.json
+
+# System files
+.DS_Store
+Thumbs.db
