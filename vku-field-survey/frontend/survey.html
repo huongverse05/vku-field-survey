@@ -6,64 +6,71 @@
     <meta name="theme-color" content="#2563eb">
     <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="css/style.css">
-    <title>Phiếu điều tra</title>
+    <title>Phiếu điều tra - VKU Field Survey</title>
 </head>
 <body>
 
 <div class="container">
     <header class="header">
-        <a href="index.html">← Trang chủ</a>
-        <a href="result.html" style="float: right;">Xem danh sách phiếu →</a>
-        <h1>Phiếu điều tra</h1>
-        <p>Khảo sát cơ sở vật chất VKU</p>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <a href="index.html" style="text-decoration: none; color: #2563eb; font-weight: 500;">← Trang chủ</a>
+            <a href="result.html" style="text-decoration: none; color: #2563eb; font-weight: 500;">Xem danh sách phiếu →</a>
+        </div>
+        <h1 style="margin: 0 0 4px 0;">Phiếu điều tra</h1>
+        <p style="margin: 0 0 6px 0; color: #4b5563;">Khảo sát cơ sở vật chất VKU</p>
+        <!-- Thẻ hiển thị trạng thái kết nối mạng được điều khiển bởi js/app.js -->
+        <p id="networkStatus" style="margin: 0 0 16px 0; font-size: 14px; font-weight: 600;">Đang kiểm tra kết nối...</p>
     </header>
 
     <form id="surveyForm" class="card">
         <div class="form-group">
             <label for="investigator">Người điều tra</label>
-            <input type="text" id="investigator" required placeholder="Nhập họ tên">
+            <input type="text" id="investigator" required placeholder="Nhập họ tên người khảo sát">
         </div>
 
         <div class="form-group">
             <label for="location">Địa điểm khảo sát</label>
-            <input type="text" id="location" required placeholder="Ví dụ: Phòng A101">
+            <input type="text" id="location" required placeholder="Ví dụ: Phòng K.A201, Tầng 2">
         </div>
 
         <div class="form-group">
             <label for="facilityType">Loại cơ sở vật chất</label>
             <select id="facilityType" required>
-                <option value="">-- Chọn --</option>
-                <option value="Phòng học">Phòng học</option>
-                <option value="Phòng máy">Phòng máy</option>
+                <option value="">-- Chọn loại cơ sở --</option>
+                <option value="Phòng học">Phòng học lý thuyết</option>
+                <option value="Phòng máy">Phòng máy thực hành</option>
                 <option value="Thư viện">Thư viện</option>
-                <option value="Khuôn viên">Khuôn viên</option>
+                <option value="Khuôn viên">Khuôn viên / Hành lang</option>
+                <option value="Khu vệ sinh">Khu vệ sinh</option>
             </select>
         </div>
 
         <div class="form-group">
             <label>Cơ sở vật chất có đảm bảo không?</label>
-            <label class="radio">
-                <input type="radio" name="quality" value="Có" required> Có
-            </label>
-            <label class="radio">
-                <input type="radio" name="quality" value="Không"> Không
-            </label>
+            <div style="display: flex; gap: 20px; margin-top: 6px;">
+                <label class="radio" style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                    <input type="radio" name="quality" value="Có" required> Đạt chuẩn
+                </label>
+                <label class="radio" style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                    <input type="radio" name="quality" value="Không"> Không đạt
+                </label>
+            </div>
         </div>
 
         <div class="form-group">
             <label for="rating">
-                Mức độ đánh giá: <span id="ratingValue">3</span>/5
+                Mức độ đánh giá: <span id="ratingValue" style="font-weight: bold; color: #2563eb;">3</span>/5 ⭐
             </label>
-            <input type="range" id="rating" min="1" max="5" value="3">
+            <input type="range" id="rating" min="1" max="5" value="3" style="width: 100%;">
         </div>
 
         <div class="form-group">
-            <label for="comment">Nhận xét</label>
-            <textarea id="comment" rows="4" placeholder="Nhập nhận xét chi tiết..."></textarea>
+            <label for="comment">Nhận xét chi tiết</label>
+            <textarea id="comment" rows="4" placeholder="Mô tả cụ thể thực trạng thiết bị (máy chiếu, đèn, bàn ghế)..."></textarea>
         </div>
 
-        <button type="submit" class="button" style="width: 100%;">Lưu phiếu</button>
-        <div id="saveMessage" style="margin-top: 12px; font-weight: 500;"></div>
+        <button type="submit" class="button" style="width: 100%; cursor: pointer;">Lưu phiếu khảo sát</button>
+        <div id="saveMessage" style="margin-top: 12px; font-weight: 500; font-size: 14px;"></div>
     </form>
 </div>
 
@@ -72,17 +79,6 @@
 <script src="js/sync.js"></script>
 <script src="js/app.js"></script>
 <script src="js/survey.js"></script>
-
-<script>
-// Cập nhật giá trị hiển thị của thanh kéo rating
-const ratingRange = document.getElementById("rating");
-const ratingText = document.getElementById("ratingValue");
-if (ratingRange && ratingText) {
-    ratingRange.addEventListener("input", (e) => {
-        ratingText.textContent = e.target.value;
-    });
-}
-</script>
 
 </body>
 </html>

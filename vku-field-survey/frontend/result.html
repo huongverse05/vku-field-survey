@@ -6,20 +6,20 @@
     <meta name="theme-color" content="#2563eb">
     <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="css/style.css">
-    <title>Phiếu đã lưu</title>
+    <title>Phiếu đã lưu - VKU Field Survey</title>
 </head>
 <body>
 
 <div class="container">
     <header class="header">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-            <a href="index.html">← Trang chủ</a>
-            <button id="btnManualSync" onclick="handleManualSync()" class="button" style="font-size: 13px; padding: 6px 12px; cursor: pointer;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <a href="survey.html" style="text-decoration: none; color: #2563eb; font-weight: 500;">← Tạo phiếu mới</a>
+            <button id="btnManualSync" class="button" style="font-size: 13px; padding: 6px 12px; cursor: pointer;">
                 🔄 Đồng bộ ngay
             </button>
         </div>
-        <h1>Phiếu đã lưu</h1>
-        <p id="networkStatusDisplay">Đang kiểm tra kết nối...</p>
+        <h1 style="margin: 0 0 6px 0;">Phiếu đã lưu</h1>
+        <p id="networkStatusDisplay" style="margin: 0 0 16px 0; font-size: 14px;">Đang kiểm tra kết nối...</p>
     </header>
 
     <div id="surveyList">
@@ -27,14 +27,12 @@
     </div>
 </div>
 
-<!-- Nạp IndexedDB và App Shell logic -->
+<!-- Nạp các module script theo đúng thứ tự phụ thuộc -->
 <script src="js/db.js"></script>
 <script src="js/sync.js"></script>
 <script src="js/app.js"></script>
 
 <script>
-const BACKEND_API = "http://127.0.0.1:5000/api/survey";
-
 function escapeHTML(value) {
     if (value === null || value === undefined) return "";
     return String(value)
@@ -53,7 +51,7 @@ async function loadSurveys() {
     if (statusDisplay) {
         statusDisplay.innerHTML = navigator.onLine 
             ? "Trạng thái: 🟢 <b>Online</b>" 
-            : "Trạng thái: 🔴 <b>Offline</b> (Đang lưu trên máy)";
+            : "Trạng thái: 🔴 <b>Offline</b> (Đang lưu cục bộ)";
     }
 
     try {
@@ -65,45 +63,45 @@ async function loadSurveys() {
 
         if (!surveys || surveys.length === 0) {
             container.innerHTML = `
-                <div class="card" style="text-align: center;">
-                    <h2>Chưa có phiếu khảo sát</h2>
-                    <p>Bạn chưa lưu phiếu nào trên thiết bị.</p>
-                    <a href="survey.html" class="button" style="display: inline-block; margin-top: 10px;">Tạo phiếu mới</a>
+                <div class="card" style="text-align: center; padding: 24px;">
+                    <h3 style="margin-top: 0;">Chưa có phiếu khảo sát</h3>
+                    <p style="color: #6b7280;">Hiện chưa có dữ liệu nào lưu trên thiết bị.</p>
+                    <a href="survey.html" class="button" style="display: inline-block; margin-top: 10px; text-decoration: none;">Tạo phiếu khảo sát mới</a>
                 </div>
             `;
             return;
         }
 
-        container.innerHTML = surveys.map(survey => {
+        // Đảo ngược danh sách để hiển thị phiếu mới nhất lên đầu
+        const reversedSurveys = [...surveys].reverse();
+
+        container.innerHTML = reversedSurveys.map(survey => {
             const isSynced = survey.status === "synced" || survey.sync_status === "synced";
             const statusBadge = isSynced 
-                ? `<span style="color: #16a34a; font-weight: bold;">🟢 Đã đồng bộ</span>` 
-                : `<span style="color: #ea580c; font-weight: bold;">🟠 Chờ đồng bộ</span>`;
+                ? `<span style="color: #16a34a; font-weight: bold; font-size: 13px;">🟢 Đã đồng bộ</span>` 
+                : `<span style="color: #ea580c; font-weight: bold; font-size: 13px;">🟠 Chờ đồng bộ</span>`;
 
             const createdAt = survey.createdAt 
                 ? new Date(survey.createdAt).toLocaleString("vi-VN") 
                 : (survey.created_at ? new Date(survey.created_at).toLocaleString("vi-VN") : "Không rõ");
 
-            // Format id thành dạng số hoặc chuỗi an toàn
-            const recordId = typeof survey.id === 'number' ? survey.id : `'${survey.id}'`;
-
             return `
-                <div class="card" style="margin-bottom: 16px;">
-                    <div style="display: flex; justify-content: space-between; align-items: start;">
-                        <h2 style="margin-top: 0;">${escapeHTML(survey.location || "Không có địa điểm")}</h2>
+                <div class="card" style="margin-bottom: 16px; border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; background: #fff;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+                        <h3 style="margin: 0; color: #1f2937;">${escapeHTML(survey.location || "Không có địa điểm")}</h3>
                         <div>${statusBadge}</div>
                     </div>
 
-                    <p><strong>Mã phiếu:</strong> ${escapeHTML(survey.id)}</p>
-                    <p><strong>Người điều tra:</strong> ${escapeHTML(survey.investigator || survey.surveyor || "Ẩn danh")}</p>
-                    <p><strong>Loại cơ sở:</strong> ${escapeHTML(survey.facilityType || "Chung")}</p>
-                    <p><strong>Đảm bảo:</strong> ${escapeHTML(survey.quality || "Không rõ")}</p>
-                    <p><strong>Đánh giá:</strong> ⭐ ${survey.rating || 0}/5</p>
-                    <p><strong>Nhận xét:</strong> ${escapeHTML(survey.comment || "Không có")}</p>
-                    <p style="font-size: 12px; color: #6b7280;"><strong>Thời gian:</strong> ${createdAt}</p>
+                    <p style="margin: 4px 0;"><strong>Mã phiếu:</strong> <code style="font-size: 12px; background: #f3f4f6; padding: 2px 4px; border-radius: 4px;">${escapeHTML(survey.id)}</code></p>
+                    <p style="margin: 4px 0;"><strong>Người điều tra:</strong> ${escapeHTML(survey.investigator || "Ẩn danh")}</p>
+                    <p style="margin: 4px 0;"><strong>Loại cơ sở:</strong> ${escapeHTML(survey.facilityType || "Chung")}</p>
+                    <p style="margin: 4px 0;"><strong>Đảm bảo:</strong> ${escapeHTML(survey.quality || "Không rõ")}</p>
+                    <p style="margin: 4px 0;"><strong>Đánh giá:</strong> ⭐ ${survey.rating || 0}/5</p>
+                    <p style="margin: 4px 0;"><strong>Nhận xét:</strong> ${escapeHTML(survey.comment || "Không có")}</p>
+                    <p style="margin: 6px 0 0 0; font-size: 12px; color: #6b7280;"><strong>Thời gian:</strong> ${createdAt}</p>
 
                     <div style="margin-top: 12px; text-align: right;">
-                        <button onclick="removeSurvey(${recordId})" class="button" style="background: #dc2626; padding: 6px 12px; font-size: 13px;">
+                        <button class="btn-delete button" data-id="${escapeHTML(survey.id)}" style="background: #dc2626; color: #fff; border: none; padding: 6px 12px; font-size: 13px; border-radius: 4px; cursor: pointer;">
                             Xóa phiếu
                         </button>
                     </div>
@@ -114,17 +112,22 @@ async function loadSurveys() {
     } catch (error) {
         console.error("Lỗi loadSurveys:", error);
         container.innerHTML = `
-            <div class="card">
-                <h2 style="color: #dc2626;">❌ Lỗi đọc dữ liệu</h2>
-                <p>Chi tiết: ${escapeHTML(error.message)}</p>
+            <div class="card" style="padding: 16px; border: 1px solid #fecaca; background: #fef2f2; border-radius: 8px;">
+                <h3 style="color: #dc2626; margin-top: 0;">❌ Lỗi đọc dữ liệu</h3>
+                <p style="margin: 0;">Chi tiết: ${escapeHTML(error.message)}</p>
             </div>
         `;
     }
 }
 
-// Xóa phiếu khỏi IndexedDB
-async function removeSurvey(id) {
-    if (!confirm("Bạn có chắc muốn xóa phiếu này không?")) return;
+// Xử lý sự kiện click xóa thông qua Event Delegation
+document.getElementById("surveyList").addEventListener("click", async (e) => {
+    const deleteBtn = e.target.closest(".btn-delete");
+    if (!deleteBtn) return;
+
+    const id = deleteBtn.getAttribute("data-id");
+    if (!confirm("Bạn có chắc chắn muốn xóa phiếu này khỏi bộ nhớ thiết bị?")) return;
+
     try {
         if (typeof deleteSurvey === "function") {
             await deleteSurvey(id);
@@ -134,82 +137,50 @@ async function removeSurvey(id) {
         }
     } catch (err) {
         console.error("Lỗi xóa phiếu:", err);
-        alert("Lỗi xóa: " + err.message);
+        alert("Lỗi khi xóa: " + err.message);
     }
-}
+});
 
-// Xử lý nút bấm đồng bộ (Tích hợp sẵn logic chạy độc lập không lo thiếu hàm từ file ngoài)
-async function handleManualSync() {
+// Xử lý nút bấm đồng bộ thủ công
+document.getElementById("btnManualSync").addEventListener("click", async () => {
     const btn = document.getElementById("btnManualSync");
     btn.disabled = true;
     btn.innerText = "Đang đồng bộ...";
 
     if (!navigator.onLine) {
-        alert("Thiết bị đang Offline, vui lòng bật mạng trước khi đồng bộ!");
+        alert("Thiết bị đang Offline! Vui lòng kết nối mạng Internet để đồng bộ.");
         btn.disabled = false;
         btn.innerText = "🔄 Đồng bộ ngay";
         return;
     }
 
     try {
-        console.log("Bắt đầu quét danh sách phiếu để đồng bộ...");
-        const surveys = await getAllSurveys();
-        const pendingSurveys = surveys.filter(s => s.status === "pending" || s.sync_status === "pending");
-
-        if (pendingSurveys.length === 0) {
-            alert("Tất cả phiếu đã được đồng bộ!");
-            btn.disabled = false;
-            btn.innerText = "🔄 Đồng bộ ngay";
-            return;
+        if (typeof syncPendingSurveys === "function") {
+            await syncPendingSurveys();
+        } else {
+            throw new Error("Không tìm thấy hàm syncPendingSurveys() từ js/sync.js");
         }
-
-        let count = 0;
-        for (const survey of pendingSurveys) {
-            try {
-                console.log("Đang gửi phiếu ID:", survey.id);
-                const res = await fetch(BACKEND_API, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(survey)
-                });
-
-                if (res.ok) {
-                    // Cập nhật trạng thái thành synced
-                    survey.status = "synced";
-                    survey.sync_status = "synced";
-                    survey.syncedAt = new Date().toISOString();
-                    
-                    // Ghi đè lại bản ghi vào IndexedDB
-                    await saveSurvey(survey);
-                    count++;
-                } else {
-                    console.error(`Lỗi HTTP ${res.status} với phiếu ${survey.id}`);
-                }
-            } catch (err) {
-                console.error(`Không thể gửi phiếu ${survey.id}:`, err);
-            }
-        }
-
-        alert(`Hoàn tất! Đã đồng bộ thành công ${count}/${pendingSurveys.length} phiếu.`);
-
     } catch (err) {
-        console.error("Lỗi đồng bộ:", err);
-        alert("Lỗi đồng bộ: " + err.message);
+        console.error("Lỗi khi kích hoạt đồng bộ:", err);
+        alert("Lỗi: " + err.message);
     } finally {
         await loadSurveys();
         btn.disabled = false;
         btn.innerText = "🔄 Đồng bộ ngay";
     }
-}
+});
 
-// Lắng nghe mạng khôi phục
+// Lắng nghe cập nhật khi trạng thái mạng thay đổi
 window.addEventListener("online", async () => {
-    await handleManualSync();
+    if (typeof syncPendingSurveys === "function") {
+        await syncPendingSurveys();
+    }
+    await loadSurveys();
 });
 
 window.addEventListener("offline", loadSurveys);
 
-// Nạp dữ liệu khi mở trang
+// Nạp dữ liệu ngay khi DOM sẵn sàng
 document.addEventListener("DOMContentLoaded", loadSurveys);
 </script>
 

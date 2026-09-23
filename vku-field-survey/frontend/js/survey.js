@@ -1,125 +1,116 @@
-const form = document.getElementById("surveyForm");
-const rating = document.getElementById("rating");
-const ratingValue = document.getElementById("ratingValue");
-const saveMessage = document.getElementById("saveMessage");
+document.addEventListener("DOMContentLoaded", () => {
+  const form = document.getElementById("surveyForm");
+  const rating = document.getElementById("rating");
+  const ratingValue = document.getElementById("ratingValue");
+  const saveMessage = document.getElementById("saveMessage");
 
+  // Hiển thị giá trị rating theo thanh kéo (slider)
+  if (rating && ratingValue) {
+    rating.addEventListener("input", () => {
+      ratingValue.textContent = rating.value;
+    });
+  }
 
-// Hiển thị mức đánh giá
-rating.addEventListener("input", () => {
-    ratingValue.textContent = rating.value;
-});
-
-
-// Tạo ID cho phiếu
-function createSurveyId() {
-    if (crypto.randomUUID) {
-        return crypto.randomUUID();
+  // Sinh ID duy nhất cho phiếu khảo sát
+  function createSurveyId() {
+    if (window.crypto && crypto.randomUUID) {
+      return crypto.randomUUID();
     }
+    return "survey_" + Date.now() + "_" + Math.random().toString(36).substring(2, 9);
+  }
 
-    return Date.now().toString() + "-" + Math.random().toString(36).substring(2);
-}
+  // Xử lý nộp form khảo sát
+  if (form) {
+    form.addEventListener("submit", async function (event) {
+      event.preventDefault();
 
-
-// Xử lý lưu phiếu
-form.addEventListener("submit", async function (event) {
-
-    event.preventDefault();
-
-    console.log("=== BẮT ĐẦU LƯU PHIẾU ===");
-
-    const qualityElement =
-        document.querySelector('input[name="quality"]:checked');
-
-    if (!qualityElement) {
-        saveMessage.innerHTML =
-            `<div class="error">Vui lòng chọn Có hoặc Không.</div>`;
+      const qualityElement = document.querySelector('input[name="quality"]:checked');
+      if (!qualityElement) {
+        if (saveMessage) {
+          saveMessage.innerHTML = `<div class="error" style="color: red; margin-top: 10px;">Vui lòng chọn Đạt hoặc Không đạt.</div>`;
+        }
         return;
-    }
+      }
 
-    const survey = {
+      const survey = {
         id: createSurveyId(),
-
         createdAt: new Date().toISOString(),
-
-        investigator:
-            document.getElementById("investigator").value,
-
-        location:
-            document.getElementById("location").value,
-
-        facilityType:
-            document.getElementById("facilityType").value,
-
-        quality:
-            qualityElement.value,
-
-        rating:
-            Number(rating.value),
-
-        comment:
-            document.getElementById("comment").value,
-
+        investigator: document.getElementById("investigator")?.value.trim() || "",
+        location: document.getElementById("location")?.value.trim() || "",
+        facilityType: document.getElementById("facilityType")?.value || "",
+        quality: qualityElement.value,
+        rating: Number(rating?.value || 3),
+        comment: document.getElementById("comment")?.value.trim() || "",
         status: "pending"
-    };
+      };
 
-    console.log("Dữ liệu phiếu:", survey);
-
-    try {
-
-        // Lưu vào IndexedDB
+      try {
+        // Lưu an toàn vào IndexedDB trước theo mô hình Offline-First
         await saveSurvey(survey);
 
-        console.log("✓ Đã lưu IndexedDB");
-
-        saveMessage.innerHTML =
-            `<div class="success">
-                ✓ Phiếu đã được lưu trên thiết bị.
-            </div>`;
-
-        // Xóa form
-        form.reset();
-
-        rating.value = 3;
-        ratingValue.textContent = 3;
-
-        // Nếu đang online thì thử đồng bộ
-        if (navigator.onLine) {
-
-            console.log("Đang online → thử đồng bộ");
-
-                saveMessage.innerHTML =
-                    `<div class="success">
-                        ✓ Phiếu đã được lưu trên thiết bị.<br>
-                        Bạn đang online – đang thử đồng bộ dữ liệu...
-                    </div>`;
-
-  
-
-            if (typeof syncPendingSurveys === "function") {
-                await syncPendingSurveys();
-            }
-
-        } else {
-
-            console.log("Đang offline → giữ phiếu trên thiết bị");
-
-                saveMessage.innerHTML =
-                    `<div class="success">
-                        ✓ Phiếu đã được lưu trên thiết bị.<br>
-                        
-                        Bạn đang offline – phiếu sẽ được đồng bộ khi có Internet.
-                     </div>`;
-
+        if (saveMessage) {
+          saveMessage.innerHTML = `
+            <div class="success" style="color: #137333; margin-top: 10px;">
+              ✓ Phiếu đã được lưu an toàn trên thiết bị.
+            </div>
+          `;
         }
 
-    } catch (error) {
+        // Reset form về trạng thái ban đầu
+        form.reset();
+        if (rating && ratingValue) {
+          rating.value = 3;
+          ratingValue.textContent = 3;
+        }
 
+        // Kiểm tra mạng và tiến hành đồng bộ
+        if (navigator.onLine) {
+          if (saveMessage) {
+            saveMessage.innerHTML = `
+              <div class="success" style="color: #137333; margin-top: 10px;">
+                ✓ Đã lưu trên thiết bị.<br>
+                Đang trực tuyến – đang tiến hành đồng bộ dữ liệu...
+              </div>
+            `;
+          }
+
+          if (typeof syncPendingSurveys === "function") {
+            await syncPendingSurveys();
+            if (saveMessage) {
+              saveMessage.innerHTML = `
+                <div class="success" style="color: #137333; margin-top: 10px;">
+                  ✓ Đã đồng bộ thành công lên máy chủ Google Sheets!
+                </div>
+              `;
+            }
+          }
+        } else {
+          if (saveMessage) {
+            saveMessage.innerHTML = `
+              <div class="info" style="color: #003399; margin-top: 10px;">
+                ✓ Bạn đang ngoại tuyến (Offline).<br>
+                Phiếu đã được lưu vào IndexedDB và sẽ tự động gửi khi có mạng.
+              </div>
+            `;
+          }
+        }
+
+        // Tự động xóa thông báo sau 5 giây
+        setTimeout(() => {
+          if (saveMessage) saveMessage.innerHTML = "";
+        }, 5000);
+
+      } catch (error) {
         console.error("LỖI LƯU PHIẾU:", error);
-
-        saveMessage.innerHTML =
-            `<div class="error">
-                Không thể lưu phiếu.<br>
-                Lỗi: ${error.message}
-            </div>`;
-    }
+        if (saveMessage) {
+          saveMessage.innerHTML = `
+            <div class="error" style="color: red; margin-top: 10px;">
+              ❌ Không thể lưu phiếu.<br>
+              Lỗi: ${error.message}
+            </div>
+          `;
+        }
+      }
+    });
+  }
 });

@@ -2,7 +2,6 @@ const CACHE_NAME = "vku-survey-v1";
 
 const APP_SHELL = [
     "./",
-    "./index.html",
     "./survey.html",
     "./result.html",
     "./manifest.json",
@@ -11,8 +10,8 @@ const APP_SHELL = [
     "./js/db.js",
     "./js/survey.js",
     "./js/sync.js",
-    "./images/icon-192.png",
-    "./images/icon-512.png"
+    "./images/icon-08.jpg",
+    "./images/icon-09.jpg"
 ];
 
 // 1. Install Event: Cache toàn bộ App Shell
@@ -25,7 +24,7 @@ self.addEventListener("install", event => {
     self.skipWaiting();
 });
 
-// 2. Activate Event: Dọn dẹp cache phiên bản cũ[cite: 1]
+// 2. Activate Event: Dọn dẹp cache phiên bản cũ
 self.addEventListener("activate", event => {
     event.waitUntil(
         caches.keys().then(names => {
@@ -39,10 +38,10 @@ self.addEventListener("activate", event => {
     self.clients.claim();
 });
 
-// 3. Fetch Event: Áp dụng Cache-First cho tài nguyên GET[cite: 1]
+// 3. Fetch Event: Áp dụng Cache-First cho App Shell & fallback an toàn
 self.addEventListener("fetch", event => {
-    // Bỏ qua các API POST gửi dữ liệu lên Google Sheets / Server
-    if (event.request.method !== "GET") {
+    // Bỏ qua các API POST gửi dữ liệu lên Google Sheets / Server Backend
+    if (event.request.method !== "GET" || event.request.url.includes("/api/")) {
         return;
     }
 
@@ -51,7 +50,12 @@ self.addEventListener("fetch", event => {
             if (cachedResponse) {
                 return cachedResponse;
             }
-            return fetch(event.request);
+            return fetch(event.request).catch(() => {
+                // Fallback về trang survey.html nếu mất mạng khi chuyển trang
+                if (event.request.headers.get("accept")?.includes("text/html")) {
+                    return caches.match("./survey.html");
+                }
+            });
         })
     );
 });

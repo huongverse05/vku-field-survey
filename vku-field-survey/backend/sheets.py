@@ -1,16 +1,17 @@
+import os
 from google.oauth2.service_account import Credentials
 from googleapiclient.discovery import build
-
 
 SCOPES = [
     "https://www.googleapis.com/auth/spreadsheets"
 ]
 
-SERVICE_ACCOUNT_FILE = "credentials/service-account.json"
+# Tự động lấy đường dẫn tuyệt đối tới thư mục backend/credentials
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+SERVICE_ACCOUNT_FILE = os.path.join(CURRENT_DIR, "credentials", "service-account.json")
 
 
 def get_sheets_service():
-
     credentials = Credentials.from_service_account_file(
         SERVICE_ACCOUNT_FILE,
         scopes=SCOPES
@@ -26,26 +27,26 @@ def get_sheets_service():
 
 
 def append_survey(spreadsheet_id, survey):
-
     service = get_sheets_service()
 
     values = [[
-        survey.get("id", ""),
-        survey.get("createdAt", ""),
-        survey.get("investigator", ""),
-        survey.get("location", ""),
-        survey.get("facilityType", ""),
-        survey.get("quality", ""),
-        survey.get("rating", ""),
-        survey.get("comment", ""),
-        survey.get("status", "synced"),
-        survey.get("syncedAt", "")
+        str(survey.get("id", "")),
+        str(survey.get("createdAt", "")),
+        str(survey.get("investigator", "")),
+        str(survey.get("location", "")),
+        str(survey.get("facilityType", "")),
+        str(survey.get("quality", "")),
+        str(survey.get("rating", "")),
+        str(survey.get("comment", "")),
+        str(survey.get("status", "synced")),
+        str(survey.get("syncedAt", ""))
     ]]
 
     body = {
         "values": values
     }
 
+    # Lưu ý: Đổi "Surveys!A:J" nếu tên tab trong Google Sheets của bạn là tên khác (vd: Sheet1!A:J)
     result = (
         service
         .spreadsheets()
@@ -53,7 +54,7 @@ def append_survey(spreadsheet_id, survey):
         .append(
             spreadsheetId=spreadsheet_id,
             range="Surveys!A:J",
-            valueInputOption="RAW",
+            valueInputOption="USER_ENTERED",  # Đổi sang USER_ENTERED để tự định dạng ngày giờ, số
             insertDataOption="INSERT_ROWS",
             body=body
         )
