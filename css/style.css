@@ -91,15 +91,24 @@ body {
 }
 
 .brand-logo {
-  width: 38px;
   height: 38px;
+  min-width: 48px;
   border-radius: var(--radius-sm);
-  background: #fff;
-  padding: 2px;
+  background: #ffffff;
+  padding: 3px 6px;
   display: flex;
   align-items: center;
   justify-content: center;
   box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+.brand-logo-img {
+  height: 100%;
+  width: auto;
+  max-width: 52px;
+  object-fit: contain;
+  display: block;
 }
 
 .brand-text h1 {

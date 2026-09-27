@@ -18,7 +18,7 @@
  * ==============================================================================
  */
 
-const CACHE_VERSION = 'vku-survey-v1.0.0';
+const CACHE_VERSION = 'vku-survey-v1.0.1';
 const STATIC_CACHE_NAME = `static-${CACHE_VERSION}`;
 const DYNAMIC_CACHE_NAME = `dynamic-${CACHE_VERSION}`;
 const DATA_CACHE_NAME = `data-${CACHE_VERSION}`;
@@ -39,7 +39,8 @@ const APP_SHELL = [
   './icons/icon.svg',
   './icons/icon-192.png',
   './icons/icon-512.png',
-  './icons/icon-maskable.png'
+  './icons/icon-maskable.png',
+  './icons/vku-logo.png'
 ];
 
 // ------------------------------------------------------------------------------

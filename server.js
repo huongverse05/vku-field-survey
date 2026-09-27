@@ -7,7 +7,7 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 
-const PORT = process.env.PORT || 3000;
+let PORT = Number(process.env.PORT) || 3000;
 const BASE_DIR = __dirname;
 
 const MIME_TYPES = {
@@ -101,6 +101,18 @@ const server = http.createServer((req, res) => {
     res.writeHead(200, { 'Content-Type': contentType });
     fs.createReadStream(safePath).pipe(res);
   });
+});
+
+server.on('error', (err) => {
+  if (err.code === 'EADDRINUSE') {
+    console.warn(`⚠️  Cổng ${PORT} đang được sử dụng (server đang chạy ở một tiến trình khác).`);
+    PORT++;
+    console.log(`🔄 Tự động thử kết nối sang cổng mới: http://localhost:${PORT}`);
+    server.listen(PORT);
+  } else {
+    console.error('Lỗi khởi động server:', err);
+    process.exit(1);
+  }
 });
 
 server.listen(PORT, () => {
