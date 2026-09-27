@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "description": "Offline-first inspection form for campus facilities with zero network connectivity - VKU Mini-Project 1",
   "scripts": {
-    "build": "echo VKU Field Survey PWA build ready",
     "start": "node dev-server.js",
     "dev": "node dev-server.js",
     "test": "node test.js"
