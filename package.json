@@ -1,0 +1,22 @@
+{
+  "name": "vku-field-survey-pwa",
+  "version": "1.0.0",
+  "description": "Offline-first inspection form for campus facilities with zero network connectivity - VKU Mini-Project 1",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "test": "node test.js"
+  },
+  "keywords": [
+    "pwa",
+    "service-worker",
+    "indexeddb",
+    "offline-first",
+    "background-sync",
+    "vku",
+    "cross-platform"
+  ],
+  "author": "VKU Student",
+  "license": "MIT"
+}

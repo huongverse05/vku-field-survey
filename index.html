@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#c51e1e">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="VKU Survey">
+  <meta name="description" content="Ứng dụng PWA kiểm tra cơ sở vật chất phòng học VKU hoạt động Offline-First">
+  
+  <title>VKU Field Survey - Khảo Sát Cơ Sở Vật Chất</title>
+
+  <!-- PWA Manifest & Icons -->
+  <link rel="manifest" href="./manifest.json">
+  <link rel="icon" type="image/svg+xml" href="./icons/icon.svg">
+  <link rel="apple-touch-icon" href="./icons/icon-192.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="./icons/icon-192.png">
+  
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="./css/style.css">
+</head>
+<body>
+
+  <!-- Top App Header -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="brand-group">
+        <div class="brand-logo">
+          <svg viewBox="0 0 100 100" width="34" height="34">
+            <rect width="100" height="100" rx="20" fill="#c51e1e"/>
+            <path d="M22 28 L40 76 L52 76 L70 28 L56 28 L46 60 L36 28 Z" fill="#ffffff"/>
+            <rect x="68" y="28" width="12" height="48" rx="3" fill="#facc15"/>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <h1>VKU FIELD SURVEY</h1>
+          <p>Kiểm định Cơ sở Vật chất • PWA</p>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <!-- Real-time Network Status Badge -->
+        <div id="networkBadge" class="network-badge online">
+          <span class="pulse-dot"></span> Trực tuyến
+        </div>
+
+        <!-- PWA Install Button -->
+        <button id="btnInstallApp" class="btn-install" title="Cài đặt PWA lên màn hình chính">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+          </svg>
+          Cài đặt
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="main-wrapper">
+
+    <!-- Offline Notification Banner -->
+    <div id="offlineBanner" class="offline-banner">
+      <div style="display:flex; align-items:center; gap:0.5rem;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 5.636a9 9 0 010 12.728m0 0l-2.829-2.829m2.829 2.829L21 21M15.536 8.464a5 5 0 010 7.072m0 0l-2.829-2.829m-4.243 4.243a9 9 0 01-6.364-2.636 9 9 0 010-12.728m0 0l2.829 2.829m-2.829-2.829L3 3m5.464 5.464a5 5 0 017.072 0m-7.072 0l2.829 2.829" />
+        </svg>
+        <span>Bạn đang <strong>ngoại tuyến</strong>. Mọi phiếu khảo sát sẽ được lưu vào <strong>IndexedDB</strong> và tự động đồng bộ khi có kết nối mạng!</span>
+      </div>
+    </div>
+
+    <!-- VIEW 1: NEW SURVEY FORM -->
+    <section id="viewNewSurvey" class="view-section active">
+      <div class="section-title-wrap">
+        <h2 class="section-title">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+          </svg>
+          Phiếu Khảo Sát Mới
+        </h2>
+        <span id="draftNotice" class="draft-notice"></span>
+      </div>
+
+      <form id="surveyForm" class="app-card">
+        <div class="form-grid">
+
+          <!-- Inspector Information -->
+          <div class="form-grid two-cols">
+            <div class="form-group">
+              <label class="form-label" for="inspectorName">Người kiểm tra <span class="req">*</span></label>
+              <input type="text" id="inspectorName" class="form-control" placeholder="Họ và tên SV / Cán bộ" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="inspectorId">Mã SV / Mã Cán bộ <span class="req">*</span></label>
+              <input type="text" id="inspectorId" class="form-control" placeholder="VD: 22IT001 hoặc CB102" required>
+            </div>
+          </div>
+
+          <!-- Campus Facility Building Selector -->
+          <div class="form-group">
+            <label class="form-label">Khuôn viên / Tòa nhà <span class="req">*</span></label>
+            <div class="chip-grid">
+              <label class="chip-option">
+                <input type="radio" name="facilityType" value="Khu A (Hiệu bộ & Lý thuyết)" checked>
+                <div class="chip-box">
+                  <span class="chip-icon">🏛️</span>
+                  <span class="chip-label">Khu A (Hiệu bộ)</span>
+                </div>
+              </label>
+              <label class="chip-option">
+                <input type="radio" name="facilityType" value="Khu V (Giảng đường V)">
+                <div class="chip-box">
+                  <span class="chip-icon">🏫</span>
+                  <span class="chip-label">Khu V (Giảng đường)</span>
+                </div>
+              </label>
+              <label class="chip-option">
+                <input type="radio" name="facilityType" value="Khu K (Phòng Lab Máy tính)">
+                <div class="chip-box">
+                  <span class="chip-icon">💻</span>
+                  <span class="chip-label">Khu K (Lab IT)</span>
+                </div>
+              </label>
+              <label class="chip-option">
+                <input type="radio" name="facilityType" value="Thư viện số VKU">
+                <div class="chip-box">
+                  <span class="chip-icon">📚</span>
+                  <span class="chip-label">Thư viện số</span>
+                </div>
+              </label>
+              <label class="chip-option">
+                <input type="radio" name="facilityType" value="Ký túc xá (KTX)">
+                <div class="chip-box">
+                  <span class="chip-icon">🏢</span>
+                  <span class="chip-label">Ký túc xá</span>
+                </div>
+              </label>
+              <label class="chip-option">
+                <input type="radio" name="facilityType" value="Khu Thể thao & Đa năng">
+                <div class="chip-box">
+                  <span class="chip-icon">⚽</span>
+                  <span class="chip-label">Sân Thể thao</span>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <!-- Room Number & Floor -->
+          <div class="form-grid two-cols">
+            <div class="form-group">
+              <label class="form-label" for="roomNumber">Số phòng / Khu vực cụ thể <span class="req">*</span></label>
+              <input type="text" id="roomNumber" class="form-control" placeholder="VD: V.204, A.101, Lab K.302" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="floorSelect">Tầng</label>
+              <select id="floorSelect" class="form-select">
+                <option value="Tầng trệt / Tầng 1">Tầng trệt / Tầng 1</option>
+                <option value="Tầng 2">Tầng 2</option>
+                <option value="Tầng 3">Tầng 3</option>
+                <option value="Tầng 4">Tầng 4</option>
+                <option value="Tầng 5">Tầng 5</option>
+                <option value="Hành lang / Ngoài trời">Hành lang / Ngoài trời</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Inspection Category -->
+          <div class="form-group">
+            <label class="form-label">Hạng mục kiểm tra <span class="req">*</span></label>
+            <div class="chip-grid">
+              <label class="chip-option">
+                <input type="radio" name="category" value="Thiết bị điện & Chiếu sáng" checked>
+                <div class="chip-box">
+                  <span class="chip-icon">💡</span>
+                  <span class="chip-label">Điện & Đèn quạt</span>
+                </div>
+              </label>
+              <label class="chip-option">
+                <input type="radio" name="category" value="Máy chiếu & CNTT Giảng đường">
+                <div class="chip-box">
+                  <span class="chip-icon">📽️</span>
+                  <span class="chip-label">Máy chiếu & CNTT</span>
+                </div>
+              </label>
+              <label class="chip-option">
+                <input type="radio" name="category" value="Điều hòa & Thông gió">
+                <div class="chip-box">
+                  <span class="chip-icon">❄️</span>
+                  <span class="chip-label">Máy lạnh / Điều hòa</span>
+                </div>
+              </label>
+              <label class="chip-option">
+                <input type="radio" name="category" value="Bàn ghế & Nội thất phòng học">
+                <div class="chip-box">
+                  <span class="chip-icon">🪑</span>
+                  <span class="chip-label">Bàn ghế & Bảng</span>
+                </div>
+              </label>
+              <label class="chip-option">
+                <input type="radio" name="category" value="Cửa ra vào & Cửa sổ kính">
+                <div class="chip-box">
+                  <span class="chip-icon">🚪</span>
+                  <span class="chip-label">Cửa sổ & Rèm</span>
+                </div>
+              </label>
+              <label class="chip-option">
+                <input type="radio" name="category" value="An toàn PCCC & Vệ sinh">
+                <div class="chip-box">
+                  <span class="chip-icon">🧯</span>
+                  <span class="chip-label">PCCC & Vệ sinh</span>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <!-- Condition / Urgency Level -->
+          <div class="form-group">
+            <label class="form-label">Tình trạng cơ sở vật chất <span class="req">*</span></label>
+            <div class="severity-grid">
+              <label class="severity-option severity-good">
+                <input type="radio" name="condition" value="good" checked>
+                <div class="severity-box">✓ Bình thường</div>
+              </label>
+              <label class="severity-option severity-maint">
+                <input type="radio" name="condition" value="maintenance">
+                <div class="severity-box">⚠️ Cần bảo trì</div>
+              </label>
+              <label class="severity-option severity-crit">
+                <input type="radio" name="condition" value="critical">
+                <div class="severity-box">🚨 Hư hỏng nặng</div>
+              </label>
+            </div>
+          </div>
+
+          <!-- Description / Notes -->
+          <div class="form-group">
+            <label class="form-label" for="description">Mô tả chi tiết hiện trạng & vị trí hỏng hóc</label>
+            <textarea id="description" class="form-textarea" placeholder="Mô tả cụ thể sự cố (VD: Đèn tuýp hàng thứ 2 bị nhấp nháy, máy chiếu bị sai màu, bàn gãy chân sắt...)"></textarea>
+          </div>
+
+          <!-- GPS Coordinates -->
+          <div class="form-group">
+            <label class="form-label">Tọa độ GPS hiện trường</label>
+            <div class="gps-wrapper">
+              <div id="gpsDisplay" class="gps-info">Chưa có dữ liệu vị trí GPS</div>
+              <button type="button" id="btnGetGPS" class="btn-gps">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"/>
+                  <line x1="12" y1="2" x2="12" y2="6"/>
+                  <line x1="12" y1="18" x2="12" y2="22"/>
+                  <line x1="2" y1="12" x2="6" y2="12"/>
+                  <line x1="18" y1="12" x2="22" y2="12"/>
+                </svg>
+                Lấy vị trí GPS hiện tại
+              </button>
+            </div>
+          </div>
+
+          <!-- Photo Evidence Capture -->
+          <div class="form-group">
+            <label class="form-label">Ảnh chụp hiện trường</label>
+            <div class="photo-uploader">
+              <input type="file" id="photoInput" class="file-input-hidden" accept="image/*">
+              <input type="file" id="cameraInput" class="file-input-hidden" accept="image/*" capture="environment">
+
+              <div class="photo-btn-group">
+                <label for="cameraInput" class="btn-upload">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
+                    <circle cx="12" cy="13" r="4"/>
+                  </svg>
+                  Chụp ảnh (Camera)
+                </label>
+                <label for="photoInput" class="btn-upload" style="background:#f1f5f9; border-color:#cbd5e1; color:#334155;">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                  </svg>
+                  Chọn từ thư viện
+                </label>
+              </div>
+
+              <!-- Photo preview box -->
+              <div id="photoPreviewContainer" class="photo-preview-container">
+                <img id="photoPreviewImg" class="photo-preview-img" alt="Ảnh chụp xem trước">
+                <button type="button" id="btnRemovePhoto" class="btn-remove-photo" title="Xóa ảnh">✕</button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Form Actions -->
+        <div class="form-footer">
+          <button type="submit" class="btn-submit">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/>
+            </svg>
+            Lưu Phiếu Khảo Sát
+          </button>
+        </div>
+      </form>
+    </section>
+
+    <!-- VIEW 2: RECORDS & SYNC QUEUE -->
+    <section id="viewRecords" class="view-section">
+      <div class="section-title-wrap">
+        <h2 class="section-title">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+          </svg>
+          Hàng Đợi Khảo Sát & Đồng Bộ
+        </h2>
+      </div>
+
+      <!-- Sync Controller Card -->
+      <div class="sync-all-card">
+        <div class="sync-info">
+          <h3>Đồng bộ dữ liệu lên Server</h3>
+          <p id="pendingCountText">0 phiếu chờ đồng bộ</p>
+        </div>
+        <button id="btnSyncAll" class="btn-sync-now">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+          Đồng bộ ngay
+        </button>
+      </div>
+
+      <!-- Filter Buttons -->
+      <div class="filter-bar">
+        <button class="filter-btn active" data-filter="all">Tất cả</button>
+        <button class="filter-btn" data-filter="pending">⏳ Chờ gửi (Offline)</button>
+        <button class="filter-btn" data-filter="synced">✓ Đã đồng bộ</button>
+        <button class="filter-btn" data-filter="critical">🚨 Hư hỏng nặng</button>
+      </div>
+
+      <!-- Records List Container -->
+      <div id="surveyListContainer" class="survey-list">
+        <!-- Rendered via JavaScript -->
+      </div>
+    </section>
+
+    <!-- VIEW 3: DASHBOARD STATS -->
+    <section id="viewStats" class="view-section">
+      <div class="section-title-wrap">
+        <h2 class="section-title">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+          </svg>
+          Thống Kê Hiện Trạng VKU
+        </h2>
+        <button id="btnExportJSON" class="btn-action-sm" style="border:1px solid var(--primary); padding: 0.35rem 0.75rem;">
+          📥 Xuất dữ liệu JSON
+        </button>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <span class="stat-val" id="statTotal">0</span>
+          <span class="stat-label">Tổng số phiếu</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-val" id="statSynced" style="color:var(--success);">0</span>
+          <span class="stat-label">Đã đồng bộ</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-val" id="statPending" style="color:var(--warning);">0</span>
+          <span class="stat-label">Chờ đồng bộ</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-val" id="statCritical" style="color:var(--danger);">0</span>
+          <span class="stat-label">Hư hỏng nặng</span>
+        </div>
+      </div>
+
+      <div class="app-card">
+        <h3 style="font-size:1rem; font-weight:700; margin-bottom:0.75rem; color:var(--secondary);">
+          Phân bố theo Khuôn viên & Giảng đường
+        </h3>
+        <div id="facilityStatsBox">
+          <!-- Rendered via JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 4: GUIDELINES (STALE-WHILE-REVALIDATE DEMO) -->
+    <section id="viewGuidelines" class="view-section">
+      <div class="section-title-wrap">
+        <h2 class="section-title">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+          </svg>
+          Tiêu Chuẩn Kiểm Định CSVC VKU
+        </h2>
+      </div>
+
+      <div class="app-card" style="margin-bottom:1rem; background: #e0e7ff; border-color:#c7d2fe;">
+        <p style="font-size:0.85rem; color:#312e81;">
+          💡 Mục này minh họa chiến lược <strong>Stale-While-Revalidate</strong> trong Service Worker: Dữ liệu tiêu chuẩn được phản hồi tức thì từ bộ nhớ Cache, đồng thời ngầm cập nhật phiên bản mới nhất từ máy chủ!
+        </p>
+      </div>
+
+      <div id="guidelinesContainer">
+        <!-- Rendered via JavaScript -->
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Bottom Navigation Bar (Native App Style) -->
+  <nav class="bottom-nav">
+    <button class="nav-item active" data-view="new-survey">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+      </svg>
+      <span>Khảo sát</span>
+    </button>
+
+    <button class="nav-item" data-view="records">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+      </svg>
+      <span>Hàng đợi</span>
+      <span id="navPendingBadge" class="nav-badge-count" style="display:none;">0</span>
+    </button>
+
+    <button class="nav-item" data-view="stats">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+      </svg>
+      <span>Thống kê</span>
+    </button>
+
+    <button class="nav-item" data-view="guidelines">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+      </svg>
+      <span>Tiêu chuẩn</span>
+    </button>
+  </nav>
+
+  <!-- Modal Dialog for Inspection Details -->
+  <div id="modalOverlay" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="modalTitle">Chi tiết phiếu khảo sát</h3>
+        <button id="btnCloseModal" class="btn-close-modal" aria-label="Đóng">✕</button>
+      </div>
+      <div id="modalBody" class="modal-body">
+        <!-- Rendered via JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- Application Scripts -->
+  <script src="./js/sw-register.js"></script>
+  <script src="./js/db.js"></script>
+  <script src="./js/app.js"></script>
+</body>
+</html>
