@@ -1,5 +1,6 @@
 # Ignore local dev server and generator scripts on Vercel deployment
 server.js
+dev-server.js
 test.js
 generate-icons.js
 generate-pwa-icons.ps1

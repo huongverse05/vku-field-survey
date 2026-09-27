@@ -36,7 +36,7 @@ const requiredFiles = [
   'icons/icon-512.png',
   'icons/icon-maskable.png',
   'icons/icon.svg',
-  'server.js',
+  'dev-server.js',
   'vercel.json',
   '_headers'
 ];
@@ -82,7 +82,7 @@ assert(dbContent.includes('by_synced'), 'Chỉ mục by_synced phục vụ hàng
 console.log('\n5. Kiểm tra Dev Server và các Mock API Endpoint:');
 const testPort = 3999;
 process.env.PORT = testPort;
-const server = require('./server.js');
+const server = require('./dev-server.js');
 
 setTimeout(() => {
   // Request /index.html
