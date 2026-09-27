@@ -122,3 +122,6 @@ server.listen(PORT, () => {
   console.log(`🎓 Faculty of Computer Science - VKU`);
   console.log(`======================================================\n`);
 });
+
+module.exports = server;
+
