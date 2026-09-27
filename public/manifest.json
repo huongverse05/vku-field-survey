@@ -1,0 +1,56 @@
+{
+  "name": "VKU Field Survey - Khảo Sát Cơ Sở Vật Chất",
+  "short_name": "VKU Survey",
+  "description": "Ứng dụng PWA kiểm tra và khảo sát cơ sở vật chất phòng học, khuôn viên VKU hoạt động Offline-First với IndexedDB và Service Worker",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "orientation": "portrait-primary",
+  "background_color": "#0f172a",
+  "theme_color": "#c51e1e",
+  "lang": "vi",
+  "categories": ["education", "utilities", "productivity"],
+  "icons": [
+    {
+      "src": "./icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icons/icon-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "./icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Khảo sát mới",
+      "short_name": "Mới",
+      "description": "Mở biểu mẫu khảo sát cơ sở vật chất mới",
+      "url": "./index.html#new-survey",
+      "icons": [{ "src": "./icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Hàng đợi đồng bộ",
+      "short_name": "Đồng bộ",
+      "description": "Xem danh sách các phiếu chờ gửi lên server",
+      "url": "./index.html#records",
+      "icons": [{ "src": "./icons/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}

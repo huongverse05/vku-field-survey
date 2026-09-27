@@ -1,0 +1,94 @@
+{
+  "updatedAt": "2026-09-27T08:00:00Z",
+  "version": "1.2.0",
+  "university": "Trường Đại học Công nghệ Thông tin & Truyền thông Việt - Hàn (VKU)",
+  "department": "Phòng Cơ sở Vật chất & Quản trị Thiết bị",
+  "guidelines": [
+    {
+      "id": "G01",
+      "category": "Thiết bị điện & Chiếu sáng",
+      "criteria": [
+        "Hệ thống đèn LED tuýp / bóng trần phải sáng đều, không chập chờn, không nhấp nháy.",
+        "Công tắc và ổ cắm điện gắn tường chắc chắn, không hở dây, không có dấu vết cháy sém.",
+        "Quạt trần hoặc quạt thông gió quay êm, không rung lắc nguy hiểm, cánh quạt sạch sẽ.",
+        "Bảng điện tủ phân phối (nếu có) phải có nắp đậy an toàn."
+      ],
+      "urgencyRules": {
+        "Critical": "Hở điện, có tia lửa, mùi khét, quạt lỏng ốc treo có nguy cơ rơi.",
+        "Maintenance": "Cháy 1-2 bóng đèn, quạt quay chậm, ổ cắm lỏng chân cắm.",
+        "Good": "Hoạt động bình thường 100%."
+      }
+    },
+    {
+      "id": "G02",
+      "category": "CNTT, Máy chiếu & Phòng Lab",
+      "criteria": [
+        "Máy chiếu (Projector) độ sáng tốt, chữ rõ nét, cổng HDMI/VGA nhận tín hiệu ổn định.",
+        "Màn chiếu kéo thả trơn tru, không rách, phẳng phiu.",
+        "Âm thanh micro trợ giảng & loa phòng học không bị rè, hú, micro đủ pin.",
+        "Dàn máy tính phòng Lab (Khu K): Bàn phím, chuột đủ, màn hình không sọc, kết nối mạng LAN thông suốt."
+      ],
+      "urgencyRules": {
+        "Critical": "Máy chiếu mất nguồn/nổ bóng, sập mạng toàn bộ phòng Lab trước giờ học.",
+        "Maintenance": "Màu máy chiếu bị ngả vàng/mờ, chuột máy tính liệt click.",
+        "Good": "Tất cả thiết bị phục vụ giảng dạy vận hành chuẩn."
+      }
+    },
+    {
+      "id": "G03",
+      "category": "Điều hòa & Thông gió",
+      "criteria": [
+        "Máy lạnh làm lạnh nhanh, đạt nhiệt độ cài đặt (25-26°C), không ồn lớn.",
+        "Dàn lạnh không bị rò rỉ nước, nhỏ giọt xuống sàn hoặc bàn ghế.",
+        "Remote điều khiển đầy đủ pin, bấm nhạy, gắn đúng khay treo tường."
+      ],
+      "urgencyRules": {
+        "Critical": "Chảy nước ồ ạt gây trơn trượt hoặc ướt thiết bị điện tử, hỏng block.",
+        "Maintenance": "Hết gas làm mát kém, mất remote hoặc hết pin remote.",
+        "Good": "Vận hành êm, mát đều phòng."
+      }
+    },
+    {
+      "id": "G04",
+      "category": "Bàn ghế & Nội thất phòng học",
+      "criteria": [
+        "Bàn liền ghế hoặc bàn học sinh viên vững chãi, không bập bênh, không gãy vát mép.",
+        "Bục giảng, bàn ghế giảng viên sạch sẽ, không bong tróc gỗ.",
+        "Bảng viết (bảng từ xanh/trắng) không ố mờ, dễ xóa, có khay phấn/bút dạ."
+      ],
+      "urgencyRules": {
+        "Critical": "Bàn ghế gãy đinh sắt nhô ra gây rách tay áo/chấn thương.",
+        "Maintenance": "Bàn lỏng vít bập bênh, bảng viết bị mờ cần thay mặt bảng.",
+        "Good": "Đầy đủ số lượng và an toàn khi ngồi."
+      }
+    },
+    {
+      "id": "G05",
+      "category": "Cửa ra vào, Cửa sổ & Rèm che",
+      "criteria": [
+        "Cửa chính mở nhẹ nhàng, ổ khóa hoạt động tốt, tay nắm không lung lay.",
+        "Cửa sổ kính nguyên vẹn, chốt cài chắc chắn chắn gió bão.",
+        "Rèm chống nắng kéo dễ dàng, che kín ánh sáng trực tiếp vào máy chiếu."
+      ],
+      "urgencyRules": {
+        "Critical": "Kính cửa sổ bị nứt vỡ có nguy cơ rơi nguy hiểm, kẹt khóa cửa phòng.",
+        "Maintenance": "Đứt dây rèm, khóa cửa rít cần tra dầu mỡ.",
+        "Good": "Đóng mở an toàn, cách âm tốt."
+      }
+    },
+    {
+      "id": "G06",
+      "category": "An toàn PCCC & Vệ sinh",
+      "criteria": [
+        "Bình chữa cháy hành lang đúng vị trí, đồng hồ áp suất kim chỉ vạch xanh, còn hạn kiểm định.",
+        "Lối thoát hiểm và cầu thang bộ thông thoáng, đèn EXIT sáng.",
+        "Sàn nhà, hành lang sạch sẽ, thùng rác phân loại đúng quy định."
+      ],
+      "urgencyRules": {
+        "Critical": "Mất bình chữa cháy, lối thoát hiểm bị chặn đồ đạc, dây điện trần.",
+        "Maintenance": "Đèn Exit cháy bóng, thùng rác đầy chưa thu gom.",
+        "Good": "Đạt chuẩn an toàn trường học."
+      }
+    }
+  ]
+}
